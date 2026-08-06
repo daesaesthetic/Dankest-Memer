@@ -1,0 +1,44 @@
+Create a Discord bot that replicates the functionality of the Dank Memer bot, with the following features:
+
+Command Structure: Implement a command structure similar to Dank Memer's, with a prefix (e.g., pls or / ) and a variety of sub-commands for different functionalities (e.g., pls shop, pls balance, pls hunt, /shop view /balance etc.).
+Economy System: Develop a robust economy system that includes:
+User accounts with balances (e.g., "coins" or " currency")
+A shop with items that can be purchased using the user's balance (e.g., "memes," "boosts," etc.)
+A bank system that allows users to deposit and withdraw their coins
+Interest rates for bank deposits
+Meme Generation: Incorporate a meme generation system that allows users to create and share their own memes using a variety of templates and images.
+Image Manipulation: Include image manipulation capabilities, such as:
+Image editing (e.g., adding text, drawing, etc.)
+Image filtering (e.g., applying filters, resizing, etc.)
+Games and Minigames: Develop a range of games and minigames, including:
+Trivia games with questions on various topics
+Word games (e.g., word scrambles, anagrams, etc.)
+Math games (e.g., math problems, math-based puzzles, etc.)
+Other games (e.g., rock-paper-scissors, coin flip, etc.)
+User Profiles: Create user profiles that display information such as:
+User balance
+User inventory (e.g., items purchased from the shop)
+User achievements (e.g., completing certain tasks or reaching milestones)
+Leaderboards: Develop leaderboards that rank users based on their:
+Balance
+Inventory value
+Achievements
+Customization: Allow server administrators to customize the bot's behavior, such as:
+Setting the bot's prefix
+Configuring the economy system (e.g., setting interest rates, shop prices, etc.)
+Creating custom commands or minigames
+Moderation: Incorporate moderation features, such as:
+User banning or kicking
+Channel management (e.g., setting channel permissions, etc.)
+API Integration: Integrate the bot with external APIs, such as:
+Image APIs (e.g., for meme generation)
+Data APIs (e.g., for trivia games)
+
+To ensure the bot is user-friendly and engaging, consider the following:
+
+Use a clear and concise command structure
+Provide detailed documentation for users and server administrators
+Offer a help system that explains the bot's features and commands
+Use emojis and other visual elements to make the bot more engaging and fun to use
+
+When developing the bot, focus on creating a scalable and maintainable architecture that can handle a large number of users and servers. This may involve using a combination of programming languages, frameworks, and databases to ensure the bot is efficient and true to dank memer
