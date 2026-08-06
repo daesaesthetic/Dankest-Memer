@@ -2,10 +2,17 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/toaster';
 import {
+  getGetArcadeOverviewQueryKey,
   getGetDiscordStatusQueryKey,
+  useClaimArcadeDaily,
+  useGetArcadeOverview,
   useGetDiscordStatus,
+  useMoveArcadeMoney,
+  useBuyArcadeItem,
+  useUpdateArcadeSettings,
 } from '@workspace/api-client-react';
-import { useMemo, useState } from 'react';
+import type { ArcadeOverview } from '@workspace/api-client-react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, Route, Switch, Router as WouterRouter, useLocation } from 'wouter';
 import {
   Activity, ArrowDownToLine, ArrowUpFromLine, Ban, BarChart3, Bell, Bot,
@@ -19,10 +26,42 @@ import {
 const queryClient = new QueryClient();
 
 type ActivityItem = { id: number; type: 'earn' | 'spend' | 'mod' | 'game' | 'meme'; title: string; detail: string; amount?: string; time: string };
-type InventoryItem = { id: number; name: string; price: number; count: number; color: string; icon: LucideIcon; description: string };
+type InventoryItem = { id: string | number; name: string; price: number; count: number; color: string; icon: LucideIcon; description: string };
 type ServerSettings = { prefix: string; interest: number; shopMarkup: number; toggles: Record<string, boolean> };
 
 const money = (n: number) => `${n.toLocaleString()} c`;
+const dashboardUser = { id: 'arcade-command-dashboard', username: 'you' };
+const relativeTime = (iso: string) => {
+  const minutes = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 60000));
+  if (minutes < 1) return 'just now';
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hr ago`;
+  return `${Math.floor(hours / 24)} days ago`;
+};
+const liveInventory = (overview: ArcadeOverview): InventoryItem[] =>
+  overview.shop.map((item) => {
+    const inventory = overview.inventory.find((entry) => entry.itemId === item.id);
+    const seeded = seededInventory.find((entry) => entry.id === item.id);
+    return {
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      count: inventory?.quantity ?? 0,
+      color: seeded?.color ?? '#8b70ff',
+      icon: seeded?.icon ?? Package,
+      description: item.description,
+    };
+  });
+const liveActivity = (overview: ArcadeOverview): ActivityItem[] =>
+  overview.activity.map((item) => ({
+    id: item.id,
+    type: (['earn', 'spend', 'mod', 'game', 'meme'].includes(item.type) ? item.type : 'earn') as ActivityItem['type'],
+    title: item.title,
+    detail: item.detail,
+    amount: item.amount === null ? undefined : `${item.amount >= 0 ? '+' : ''}${money(item.amount)}`,
+    time: relativeTime(item.createdAt),
+  }));
 const seededActivity: ActivityItem[] = [
   { id: 1, type: 'earn', title: 'Daily reward claimed', detail: 'You kept the streak alive', amount: '+250 c', time: '8 min ago' },
   { id: 2, type: 'game', title: 'Won coin flip', detail: 'Risked 50 c on heads', amount: '+100 c', time: '31 min ago' },
@@ -128,13 +167,13 @@ function ActivityFeed({ items, limit }: { items: ActivityItem[]; limit?: number 
   return <div className="space-y-1">{data.map(item => { const info = typeMap[item.type]; return <div data-testid={`activity-item-${item.id}`} key={item.id} className="flex items-center gap-3 rounded-xl px-2 py-3 transition hover:bg-muted/60"><IconBadge icon={info.icon} color={info.color} /><div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold">{item.title}</p><p className="truncate text-xs text-muted-foreground">{item.detail}</p></div><div className="text-right">{item.amount && <p className={`font-mono-app text-xs font-medium ${item.amount.startsWith('+') ? 'text-[#21827a]' : 'text-[#ab7134]'}`}>{item.amount}</p>}<p className="mt-1 text-[10px] text-muted-foreground">{item.time}</p></div></div>; })}</div>;
 }
 
-function Dashboard({ balance, bank, activities, claimDaily, dailyClaimed, onNav }: { balance: number; bank: number; activities: ActivityItem[]; claimDaily: () => void; dailyClaimed: boolean; onNav: (path: string) => void }) {
-  return <><Header title="Dashboard" /><SectionTitle eyebrow="Tuesday · 14 May" title="Good evening, you." detail="The community is humming. Here is your little corner of the server." action={<div className="flex items-center gap-2"><div className="hidden rounded-xl border border-border bg-card px-3 py-2 text-xs text-muted-foreground sm:block"><span className="mr-2 text-primary">◆</span>Moonbeam Arcade</div><ActionButton icon={RefreshCw} variant="soft" onClick={() => window.location.reload()}>Refresh</ActionButton></div>} />
+function Dashboard({ balance, bank, activities, claimDaily, dailyClaimed, dailyAmount, onNav, guildName }: { balance: number; bank: number; activities: ActivityItem[]; claimDaily: () => void; dailyClaimed: boolean; dailyAmount: number; onNav: (path: string) => void; guildName: string }) {
+  return <><Header title="Dashboard" /><SectionTitle eyebrow="Live Discord server" title="Good evening, you." detail={`The community is humming in ${guildName}. Here is your little corner of the server.`} action={<div className="flex items-center gap-2"><div className="hidden rounded-xl border border-border bg-card px-3 py-2 text-xs text-muted-foreground sm:block"><span className="mr-2 text-primary">◆</span>{guildName}</div><ActionButton icon={RefreshCw} variant="soft" onClick={() => window.location.reload()}>Refresh</ActionButton></div>} />
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       <StatCard label="Wallet balance" value={money(balance)} change="+ 1,420 c this week" icon={Coins} accent="purple" />
       <StatCard label="In the bank" value={money(bank)} change="Interest hits every 24h" icon={LockKeyhole} accent="teal" />
       <StatCard label="Server rank" value="#4" change="Up one spot this week" icon={Trophy} accent="gold" />
-      <div className="relative overflow-hidden rounded-2xl bg-sidebar p-5 text-sidebar-foreground shadow-sm"><div className="absolute -right-6 -top-8 h-28 w-28 rounded-full border-[16px] border-accent/20" /><div className="relative flex items-start justify-between"><div><p className="text-xs text-sidebar-foreground/65">Daily reward</p><p className="mt-2 font-display text-2xl font-bold tracking-[-.05em]">{dailyClaimed ? 'Claimed' : '+250 c'}</p></div><div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-accent-foreground"><Sparkles className="h-[18px] w-[18px]" /></div></div><button data-testid="button-claim-daily" onClick={claimDaily} disabled={dailyClaimed} className="relative mt-4 w-full rounded-lg bg-accent py-2 text-xs font-bold text-accent-foreground transition hover:brightness-105 disabled:cursor-default disabled:opacity-45">{dailyClaimed ? 'Come back tomorrow' : 'Claim reward'}</button></div>
+      <div className="relative overflow-hidden rounded-2xl bg-sidebar p-5 text-sidebar-foreground shadow-sm"><div className="absolute -right-6 -top-8 h-28 w-28 rounded-full border-[16px] border-accent/20" /><div className="relative flex items-start justify-between"><div><p className="text-xs text-sidebar-foreground/65">Daily reward</p><p className="mt-2 font-display text-2xl font-bold tracking-[-.05em]">{dailyClaimed ? 'Claimed' : `+${dailyAmount} c`}</p></div><div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-accent-foreground"><Sparkles className="h-[18px] w-[18px]" /></div></div><button data-testid="button-claim-daily" onClick={claimDaily} disabled={dailyClaimed} className="relative mt-4 w-full rounded-lg bg-accent py-2 text-xs font-bold text-accent-foreground transition hover:brightness-105 disabled:cursor-default disabled:opacity-45">{dailyClaimed ? 'Come back tomorrow' : 'Claim reward'}</button></div>
     </div>
     <div className="mt-5 grid gap-5 xl:grid-cols-[1.45fr_.85fr]">
       <div className="rounded-2xl border border-card-border bg-card p-5 shadow-sm sm:p-6"><div className="mb-5 flex items-center justify-between"><div><h2 className="font-display text-lg font-bold tracking-[-.03em]">Your momentum</h2><p className="mt-1 text-xs text-muted-foreground">A quick read on this week’s activity</p></div><button data-testid="button-view-activity" onClick={() => onNav('/economy')} className="text-xs font-semibold text-primary hover:underline">View ledger <ChevronRight className="ml-1 inline h-3 w-3" /></button></div><div className="grid grid-cols-7 items-end gap-2 border-b border-border pb-4 pt-3">{[42, 56, 38, 68, 53, 77, 62].map((height, i) => <div key={i} className="flex flex-col items-center gap-2"><div className={`w-full max-w-[42px] rounded-t-md ${i === 5 ? 'bg-accent' : 'bg-primary/20'}`} style={{ height: `${height}px` }} /><span className={`font-mono-app text-[9px] ${i === 5 ? 'font-bold text-foreground' : 'text-muted-foreground'}`}>{['W','T','F','S','S','M','T'][i]}</span></div>)}</div><div className="mt-5 grid grid-cols-3 gap-3"><div><p className="text-[10px] uppercase tracking-wider text-muted-foreground">Earned</p><p className="mt-1 font-display text-lg font-bold">2,870 c</p></div><div><p className="text-[10px] uppercase tracking-wider text-muted-foreground">Games won</p><p className="mt-1 font-display text-lg font-bold">18</p></div><div><p className="text-[10px] uppercase tracking-wider text-muted-foreground">Streak</p><p className="mt-1 font-display text-lg font-bold text-[#b67a17]">7 days</p></div></div></div>

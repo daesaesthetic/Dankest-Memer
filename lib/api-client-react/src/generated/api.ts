@@ -6,22 +6,35 @@
  * OpenAPI spec version: 0.1.0
  */
 import {
+  useMutation,
   useQuery
 } from '@tanstack/react-query';
 import type {
+  MutationFunction,
   QueryFunction,
   QueryKey,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult
 } from '@tanstack/react-query';
 
 import type {
+  ArcadeAccount,
+  ArcadeAccountIdentity,
+  ArcadeActionResult,
+  ArcadeMoneyMove,
+  ArcadeOverview,
+  ArcadePurchase,
+  ArcadeSettings,
+  ArcadeSettingsUpdate,
   DiscordStatus,
+  GetArcadeOverviewParams,
   HealthStatus
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
-import type { ErrorType } from '../custom-fetch';
+import type { ErrorType , BodyType } from '../custom-fetch';
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
@@ -202,4 +215,382 @@ export function useGetDiscordStatus<TData = Awaited<ReturnType<typeof getDiscord
 
 
 
+
+export const getGetArcadeOverviewUrl = (params: GetArcadeOverviewParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/arcade/overview?${stringifiedParams}` : `/api/arcade/overview`
+}
+
+/**
+ * @summary Get the live Arcade Command overview
+ */
+export const getArcadeOverview = async (params: GetArcadeOverviewParams, options?: Parameters<typeof customFetch>[1]): Promise<ArcadeOverview> => {
+
+  return customFetch<ArcadeOverview>(getGetArcadeOverviewUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetArcadeOverviewQueryKey = (params?: GetArcadeOverviewParams,) => {
+    return [
+    `/api/arcade/overview`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetArcadeOverviewQueryOptions = <TData = Awaited<ReturnType<typeof getArcadeOverview>>, TError = ErrorType<unknown>>(params: GetArcadeOverviewParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getArcadeOverview>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetArcadeOverviewQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getArcadeOverview>>> = ({ signal }) => getArcadeOverview(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getArcadeOverview>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetArcadeOverviewQueryResult = NonNullable<Awaited<ReturnType<typeof getArcadeOverview>>>
+export type GetArcadeOverviewQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get the live Arcade Command overview
+ */
+
+export function useGetArcadeOverview<TData = Awaited<ReturnType<typeof getArcadeOverview>>, TError = ErrorType<unknown>>(
+ params: GetArcadeOverviewParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getArcadeOverview>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetArcadeOverviewQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateArcadeSettingsUrl = (guildId: string,) => {
+
+
+
+
+  return `/api/arcade/settings/${guildId}`
+}
+
+/**
+ * @summary Update server Arcade settings
+ */
+export const updateArcadeSettings = async (guildId: string,
+    arcadeSettingsUpdate: ArcadeSettingsUpdate, options?: Parameters<typeof customFetch>[1]): Promise<ArcadeSettings> => {
+
+  return customFetch<ArcadeSettings>(getUpdateArcadeSettingsUrl(guildId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(arcadeSettingsUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateArcadeSettingsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateArcadeSettings>>, TError,{guildId: string;data: BodyType<ArcadeSettingsUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateArcadeSettings>>, TError,{guildId: string;data: BodyType<ArcadeSettingsUpdate>}, TContext> => {
+
+const mutationKey = ['updateArcadeSettings'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateArcadeSettings>>, {guildId: string;data: BodyType<ArcadeSettingsUpdate>}> = (props) => {
+          const {guildId,data} = props ?? {};
+
+          return  updateArcadeSettings(guildId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateArcadeSettingsMutationResult = NonNullable<Awaited<ReturnType<typeof updateArcadeSettings>>>
+    export type UpdateArcadeSettingsMutationBody = BodyType<ArcadeSettingsUpdate>
+    export type UpdateArcadeSettingsMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update server Arcade settings
+ */
+export const useUpdateArcadeSettings = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateArcadeSettings>>, TError,{guildId: string;data: BodyType<ArcadeSettingsUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateArcadeSettings>>,
+        TError,
+        {guildId: string;data: BodyType<ArcadeSettingsUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateArcadeSettingsMutationOptions(options));
+    }
+
+export const getMoveArcadeMoneyUrl = (guildId: string,
+    userId: string,) => {
+
+
+
+
+  return `/api/arcade/accounts/${guildId}/${userId}/bank`
+}
+
+/**
+ * @summary Deposit or withdraw credits
+ */
+export const moveArcadeMoney = async (guildId: string,
+    userId: string,
+    arcadeMoneyMove: ArcadeMoneyMove, options?: Parameters<typeof customFetch>[1]): Promise<ArcadeAccount> => {
+
+  return customFetch<ArcadeAccount>(getMoveArcadeMoneyUrl(guildId,userId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(arcadeMoneyMove)
+  }
+);}
+
+
+
+
+
+export const getMoveArcadeMoneyMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof moveArcadeMoney>>, TError,{guildId: string;userId: string;data: BodyType<ArcadeMoneyMove>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof moveArcadeMoney>>, TError,{guildId: string;userId: string;data: BodyType<ArcadeMoneyMove>}, TContext> => {
+
+const mutationKey = ['moveArcadeMoney'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof moveArcadeMoney>>, {guildId: string;userId: string;data: BodyType<ArcadeMoneyMove>}> = (props) => {
+          const {guildId,userId,data} = props ?? {};
+
+          return  moveArcadeMoney(guildId,userId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MoveArcadeMoneyMutationResult = NonNullable<Awaited<ReturnType<typeof moveArcadeMoney>>>
+    export type MoveArcadeMoneyMutationBody = BodyType<ArcadeMoneyMove>
+    export type MoveArcadeMoneyMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Deposit or withdraw credits
+ */
+export const useMoveArcadeMoney = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof moveArcadeMoney>>, TError,{guildId: string;userId: string;data: BodyType<ArcadeMoneyMove>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof moveArcadeMoney>>,
+        TError,
+        {guildId: string;userId: string;data: BodyType<ArcadeMoneyMove>},
+        TContext
+      > => {
+      return useMutation(getMoveArcadeMoneyMutationOptions(options));
+    }
+
+export const getClaimArcadeDailyUrl = (guildId: string,
+    userId: string,) => {
+
+
+
+
+  return `/api/arcade/accounts/${guildId}/${userId}/daily`
+}
+
+/**
+ * @summary Claim the daily reward
+ */
+export const claimArcadeDaily = async (guildId: string,
+    userId: string,
+    arcadeAccountIdentity?: ArcadeAccountIdentity, options?: Parameters<typeof customFetch>[1]): Promise<ArcadeActionResult> => {
+
+  return customFetch<ArcadeActionResult>(getClaimArcadeDailyUrl(guildId,userId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(arcadeAccountIdentity)
+  }
+);}
+
+
+
+
+
+export const getClaimArcadeDailyMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimArcadeDaily>>, TError,{guildId: string;userId: string;data?: BodyType<ArcadeAccountIdentity>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof claimArcadeDaily>>, TError,{guildId: string;userId: string;data?: BodyType<ArcadeAccountIdentity>}, TContext> => {
+
+const mutationKey = ['claimArcadeDaily'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof claimArcadeDaily>>, {guildId: string;userId: string;data?: BodyType<ArcadeAccountIdentity>}> = (props) => {
+          const {guildId,userId,data} = props ?? {};
+
+          return  claimArcadeDaily(guildId,userId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ClaimArcadeDailyMutationResult = NonNullable<Awaited<ReturnType<typeof claimArcadeDaily>>>
+    export type ClaimArcadeDailyMutationBody = BodyType<ArcadeAccountIdentity> | undefined
+    export type ClaimArcadeDailyMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Claim the daily reward
+ */
+export const useClaimArcadeDaily = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimArcadeDaily>>, TError,{guildId: string;userId: string;data?: BodyType<ArcadeAccountIdentity>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof claimArcadeDaily>>,
+        TError,
+        {guildId: string;userId: string;data?: BodyType<ArcadeAccountIdentity>},
+        TContext
+      > => {
+      return useMutation(getClaimArcadeDailyMutationOptions(options));
+    }
+
+export const getBuyArcadeItemUrl = (guildId: string,
+    userId: string,) => {
+
+
+
+
+  return `/api/arcade/accounts/${guildId}/${userId}/shop`
+}
+
+/**
+ * @summary Buy a shop item
+ */
+export const buyArcadeItem = async (guildId: string,
+    userId: string,
+    arcadePurchase: ArcadePurchase, options?: Parameters<typeof customFetch>[1]): Promise<ArcadeActionResult> => {
+
+  return customFetch<ArcadeActionResult>(getBuyArcadeItemUrl(guildId,userId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(arcadePurchase)
+  }
+);}
+
+
+
+
+
+export const getBuyArcadeItemMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof buyArcadeItem>>, TError,{guildId: string;userId: string;data: BodyType<ArcadePurchase>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof buyArcadeItem>>, TError,{guildId: string;userId: string;data: BodyType<ArcadePurchase>}, TContext> => {
+
+const mutationKey = ['buyArcadeItem'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof buyArcadeItem>>, {guildId: string;userId: string;data: BodyType<ArcadePurchase>}> = (props) => {
+          const {guildId,userId,data} = props ?? {};
+
+          return  buyArcadeItem(guildId,userId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type BuyArcadeItemMutationResult = NonNullable<Awaited<ReturnType<typeof buyArcadeItem>>>
+    export type BuyArcadeItemMutationBody = BodyType<ArcadePurchase>
+    export type BuyArcadeItemMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Buy a shop item
+ */
+export const useBuyArcadeItem = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof buyArcadeItem>>, TError,{guildId: string;userId: string;data: BodyType<ArcadePurchase>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof buyArcadeItem>>,
+        TError,
+        {guildId: string;userId: string;data: BodyType<ArcadePurchase>},
+        TContext
+      > => {
+      return useMutation(getBuyArcadeItemMutationOptions(options));
+    }
 

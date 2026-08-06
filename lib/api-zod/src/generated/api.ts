@@ -26,7 +26,182 @@ export const GetDiscordStatusResponse = zod.object({
   "botName": zod.string().nullable(),
   "botTag": zod.string().nullable(),
   "guildCount": zod.number(),
-  "message": zod.string()
+  "message": zod.string(),
+  "primaryGuildId": zod.string().nullable(),
+  "primaryGuildName": zod.string().nullable()
+})
+
+
+/**
+ * @summary Get the live Arcade Command overview
+ */
+export const GetArcadeOverviewQueryParams = zod.object({
+  "guildId": zod.coerce.string(),
+  "userId": zod.coerce.string().optional(),
+  "username": zod.coerce.string().optional()
+})
+
+export const GetArcadeOverviewResponse = zod.object({
+  "settings": zod.object({
+  "guildId": zod.string(),
+  "guildName": zod.string(),
+  "prefix": zod.string(),
+  "interestBps": zod.number(),
+  "dailyAmount": zod.number(),
+  "toggles": zod.record(zod.string(), zod.boolean())
+}),
+  "account": zod.union([zod.object({
+  "guildId": zod.string(),
+  "userId": zod.string(),
+  "username": zod.string(),
+  "wallet": zod.number(),
+  "bank": zod.number(),
+  "xp": zod.number(),
+  "achievementCount": zod.number(),
+  "dailyStreak": zod.number(),
+  "lastDailyAt": zod.string().nullable()
+}),zod.null()]),
+  "inventory": zod.array(zod.object({
+  "itemId": zod.string(),
+  "quantity": zod.number()
+})),
+  "shop": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "price": zod.number(),
+  "description": zod.string()
+})),
+  "leaderboard": zod.array(zod.object({
+  "guildId": zod.string(),
+  "userId": zod.string(),
+  "username": zod.string(),
+  "wallet": zod.number(),
+  "bank": zod.number(),
+  "xp": zod.number(),
+  "achievementCount": zod.number(),
+  "dailyStreak": zod.number(),
+  "lastDailyAt": zod.string().nullable()
+})),
+  "activity": zod.array(zod.object({
+  "id": zod.number(),
+  "type": zod.string(),
+  "title": zod.string(),
+  "detail": zod.string(),
+  "amount": zod.number().nullable(),
+  "createdAt": zod.string()
+})),
+  "memberCount": zod.number()
+})
+
+
+/**
+ * @summary Update server Arcade settings
+ */
+export const UpdateArcadeSettingsParams = zod.object({
+  "guildId": zod.coerce.string()
+})
+
+export const UpdateArcadeSettingsBody = zod.object({
+  "prefix": zod.string().optional(),
+  "interestBps": zod.number().optional(),
+  "dailyAmount": zod.number().optional(),
+  "toggles": zod.record(zod.string(), zod.boolean()).optional()
+})
+
+export const UpdateArcadeSettingsResponse = zod.object({
+  "guildId": zod.string(),
+  "guildName": zod.string(),
+  "prefix": zod.string(),
+  "interestBps": zod.number(),
+  "dailyAmount": zod.number(),
+  "toggles": zod.record(zod.string(), zod.boolean())
+})
+
+
+/**
+ * @summary Deposit or withdraw credits
+ */
+export const MoveArcadeMoneyParams = zod.object({
+  "guildId": zod.coerce.string(),
+  "userId": zod.coerce.string()
+})
+
+export const MoveArcadeMoneyBody = zod.object({
+  "kind": zod.enum(['deposit', 'withdraw']),
+  "amount": zod.number(),
+  "username": zod.string()
+})
+
+export const MoveArcadeMoneyResponse = zod.object({
+  "guildId": zod.string(),
+  "userId": zod.string(),
+  "username": zod.string(),
+  "wallet": zod.number(),
+  "bank": zod.number(),
+  "xp": zod.number(),
+  "achievementCount": zod.number(),
+  "dailyStreak": zod.number(),
+  "lastDailyAt": zod.string().nullable()
+})
+
+
+/**
+ * @summary Claim the daily reward
+ */
+export const ClaimArcadeDailyParams = zod.object({
+  "guildId": zod.coerce.string(),
+  "userId": zod.coerce.string()
+})
+
+export const ClaimArcadeDailyBody = zod.object({
+  "username": zod.string()
+})
+
+export const ClaimArcadeDailyResponse = zod.object({
+  "ok": zod.boolean(),
+  "message": zod.string(),
+  "account": zod.object({
+  "guildId": zod.string(),
+  "userId": zod.string(),
+  "username": zod.string(),
+  "wallet": zod.number(),
+  "bank": zod.number(),
+  "xp": zod.number(),
+  "achievementCount": zod.number(),
+  "dailyStreak": zod.number(),
+  "lastDailyAt": zod.string().nullable()
+})
+})
+
+
+/**
+ * @summary Buy a shop item
+ */
+export const BuyArcadeItemParams = zod.object({
+  "guildId": zod.coerce.string(),
+  "userId": zod.coerce.string()
+})
+
+export const BuyArcadeItemBody = zod.object({
+  "itemId": zod.string(),
+  "quantity": zod.number(),
+  "username": zod.string()
+})
+
+export const BuyArcadeItemResponse = zod.object({
+  "ok": zod.boolean(),
+  "message": zod.string(),
+  "account": zod.object({
+  "guildId": zod.string(),
+  "userId": zod.string(),
+  "username": zod.string(),
+  "wallet": zod.number(),
+  "bank": zod.number(),
+  "xp": zod.number(),
+  "achievementCount": zod.number(),
+  "dailyStreak": zod.number(),
+  "lastDailyAt": zod.string().nullable()
+})
 })
 
 

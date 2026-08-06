@@ -17,5 +17,110 @@ export interface DiscordStatus {
   botTag: string | null;
   guildCount: number;
   message: string;
+  /** @nullable */
+  primaryGuildId: string | null;
+  /** @nullable */
+  primaryGuildName: string | null;
 }
+
+export type ArcadeSettingsToggles = {[key: string]: boolean};
+
+export interface ArcadeSettings {
+  guildId: string;
+  guildName: string;
+  prefix: string;
+  interestBps: number;
+  dailyAmount: number;
+  toggles: ArcadeSettingsToggles;
+}
+
+export interface ArcadeAccount {
+  guildId: string;
+  userId: string;
+  username: string;
+  wallet: number;
+  bank: number;
+  xp: number;
+  achievementCount: number;
+  dailyStreak: number;
+  /** @nullable */
+  lastDailyAt: string | null;
+}
+
+export interface ArcadeInventoryItem {
+  itemId: string;
+  quantity: number;
+}
+
+export interface ArcadeShopItem {
+  id: string;
+  name: string;
+  price: number;
+  description: string;
+}
+
+export interface ArcadeActivity {
+  id: number;
+  type: string;
+  title: string;
+  detail: string;
+  /** @nullable */
+  amount: number | null;
+  createdAt: string;
+}
+
+export interface ArcadeOverview {
+  settings: ArcadeSettings;
+  account: ArcadeAccount | null;
+  inventory: ArcadeInventoryItem[];
+  shop: ArcadeShopItem[];
+  leaderboard: ArcadeAccount[];
+  activity: ArcadeActivity[];
+  memberCount: number;
+}
+
+export interface ArcadeAccountIdentity {
+  username: string;
+}
+
+export type ArcadeSettingsUpdateToggles = {[key: string]: boolean};
+
+export interface ArcadeSettingsUpdate {
+  prefix?: string;
+  interestBps?: number;
+  dailyAmount?: number;
+  toggles?: ArcadeSettingsUpdateToggles;
+}
+
+export type ArcadeMoneyMoveKind = typeof ArcadeMoneyMoveKind[keyof typeof ArcadeMoneyMoveKind];
+
+
+export const ArcadeMoneyMoveKind = {
+  deposit: 'deposit',
+  withdraw: 'withdraw',
+} as const;
+
+export interface ArcadeMoneyMove {
+  kind: ArcadeMoneyMoveKind;
+  amount: number;
+  username: string;
+}
+
+export interface ArcadePurchase {
+  itemId: string;
+  quantity: number;
+  username: string;
+}
+
+export interface ArcadeActionResult {
+  ok: boolean;
+  message: string;
+  account: ArcadeAccount;
+}
+
+export type GetArcadeOverviewParams = {
+guildId: string;
+userId?: string;
+username?: string;
+};
 

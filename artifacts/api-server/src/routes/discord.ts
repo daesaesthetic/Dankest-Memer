@@ -9,6 +9,7 @@ type DiscordUser = {
 
 type DiscordGuild = {
   id: string;
+  name?: string;
 };
 
 type CachedStatus = {
@@ -29,6 +30,8 @@ async function fetchDiscordStatus() {
       botTag: null,
       guildCount: 0,
       message: "Add a Discord bot token to connect your server.",
+      primaryGuildId: null,
+      primaryGuildName: null,
     });
   }
 
@@ -50,6 +53,8 @@ async function fetchDiscordStatus() {
         botTag: null,
         guildCount: 0,
         message: "Discord did not accept the bot token.",
+        primaryGuildId: null,
+        primaryGuildName: null,
       });
     }
 
@@ -67,6 +72,8 @@ async function fetchDiscordStatus() {
       botTag,
       guildCount: guilds.length,
       message: "Discord bot is connected and ready.",
+      primaryGuildId: guilds[0]?.id ?? null,
+      primaryGuildName: guilds[0]?.name ?? null,
     });
   } catch {
     return GetDiscordStatusResponse.parse({
@@ -75,6 +82,8 @@ async function fetchDiscordStatus() {
       botTag: null,
       guildCount: 0,
       message: "Discord could not be reached right now.",
+      primaryGuildId: null,
+      primaryGuildName: null,
     });
   }
 }

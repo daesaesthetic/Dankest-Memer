@@ -12,6 +12,8 @@ tags:
     description: Health operations
   - name: discord
     description: Discord connection operations
+  - name: arcade
+    description: Arcade economy and server operations
 paths:
   /healthz:
     get:
@@ -39,6 +41,145 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/DiscordStatus"
+  /arcade/overview:
+    get:
+      operationId: getArcadeOverview
+      tags: [arcade]
+      summary: Get the live Arcade Command overview
+      parameters:
+        - name: guildId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: userId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: username
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Live guild economy overview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArcadeOverview"
+  /arcade/settings/{guildId}:
+    patch:
+      operationId: updateArcadeSettings
+      tags: [arcade]
+      summary: Update server Arcade settings
+      parameters:
+        - name: guildId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ArcadeSettingsUpdate"
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArcadeSettings"
+  /arcade/accounts/{guildId}/{userId}/bank:
+    post:
+      operationId: moveArcadeMoney
+      tags: [arcade]
+      summary: Deposit or withdraw credits
+      parameters:
+        - name: guildId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ArcadeMoneyMove"
+      responses:
+        "200":
+          description: Updated account
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArcadeAccount"
+  /arcade/accounts/{guildId}/{userId}/daily:
+    post:
+      operationId: claimArcadeDaily
+      tags: [arcade]
+      summary: Claim the daily reward
+      parameters:
+        - name: guildId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ArcadeAccountIdentity"
+      responses:
+        "200":
+          description: Daily reward result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArcadeActionResult"
+  /arcade/accounts/{guildId}/{userId}/shop:
+    post:
+      operationId: buyArcadeItem
+      tags: [arcade]
+      summary: Buy a shop item
+      parameters:
+        - name: guildId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ArcadePurchase"
+      responses:
+        "200":
+          description: Purchase result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArcadeActionResult"
 components:
   schemas:
     HealthStatus:
@@ -61,10 +202,170 @@ components:
           type: number
         message:
           type: string
+        primaryGuildId:
+          type: ["string", "null"]
+        primaryGuildName:
+          type: ["string", "null"]
       required:
         - connected
         - botName
         - botTag
         - guildCount
         - message
+        - primaryGuildId
+        - primaryGuildName
+    ArcadeSettings:
+      type: object
+      properties:
+        guildId:
+          type: string
+        guildName:
+          type: string
+        prefix:
+          type: string
+        interestBps:
+          type: number
+        dailyAmount:
+          type: number
+        toggles:
+          type: object
+          additionalProperties:
+            type: boolean
+      required: [guildId, guildName, prefix, interestBps, dailyAmount, toggles]
+    ArcadeAccount:
+      type: object
+      properties:
+        guildId:
+          type: string
+        userId:
+          type: string
+        username:
+          type: string
+        wallet:
+          type: number
+        bank:
+          type: number
+        xp:
+          type: number
+        achievementCount:
+          type: number
+        dailyStreak:
+          type: number
+        lastDailyAt:
+          type: ["string", "null"]
+      required: [guildId, userId, username, wallet, bank, xp, achievementCount, dailyStreak, lastDailyAt]
+    ArcadeInventoryItem:
+      type: object
+      properties:
+        itemId:
+          type: string
+        quantity:
+          type: number
+      required: [itemId, quantity]
+    ArcadeShopItem:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        price:
+          type: number
+        description:
+          type: string
+      required: [id, name, price, description]
+    ArcadeActivity:
+      type: object
+      properties:
+        id:
+          type: number
+        type:
+          type: string
+        title:
+          type: string
+        detail:
+          type: string
+        amount:
+          type: ["number", "null"]
+        createdAt:
+          type: string
+      required: [id, type, title, detail, amount, createdAt]
+    ArcadeOverview:
+      type: object
+      properties:
+        settings:
+          $ref: "#/components/schemas/ArcadeSettings"
+        account:
+          oneOf:
+            - $ref: "#/components/schemas/ArcadeAccount"
+            - type: "null"
+        inventory:
+          type: array
+          items:
+            $ref: "#/components/schemas/ArcadeInventoryItem"
+        shop:
+          type: array
+          items:
+            $ref: "#/components/schemas/ArcadeShopItem"
+        leaderboard:
+          type: array
+          items:
+            $ref: "#/components/schemas/ArcadeAccount"
+        activity:
+          type: array
+          items:
+            $ref: "#/components/schemas/ArcadeActivity"
+        memberCount:
+          type: number
+      required: [settings, account, inventory, shop, leaderboard, activity, memberCount]
+    ArcadeAccountIdentity:
+      type: object
+      properties:
+        username:
+          type: string
+      required: [username]
+    ArcadeSettingsUpdate:
+      type: object
+      properties:
+        prefix:
+          type: string
+        interestBps:
+          type: number
+        dailyAmount:
+          type: number
+        toggles:
+          type: object
+          additionalProperties:
+            type: boolean
+    ArcadeMoneyMove:
+      type: object
+      properties:
+        kind:
+          type: string
+          enum: [deposit, withdraw]
+        amount:
+          type: number
+        username:
+          type: string
+      required: [kind, amount, username]
+    ArcadePurchase:
+      type: object
+      properties:
+        itemId:
+          type: string
+        quantity:
+          type: number
+        username:
+          type: string
+      required: [itemId, quantity, username]
+    ArcadeActionResult:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        message:
+          type: string
+        account:
+          $ref: "#/components/schemas/ArcadeAccount"
+      required: [ok, message, account]
 

@@ -14,4 +14,8 @@ export interface DiscordStatus {
   botTag: string | null;
   guildCount: number;
   message: string;
+  /** @nullable */
+  primaryGuildId: string | null;
+  /** @nullable */
+  primaryGuildName: string | null;
 }

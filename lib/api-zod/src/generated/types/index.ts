@@ -6,5 +6,20 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './arcadeAccount';
+export * from './arcadeAccountIdentity';
+export * from './arcadeActionResult';
+export * from './arcadeActivity';
+export * from './arcadeInventoryItem';
+export * from './arcadeMoneyMove';
+export * from './arcadeMoneyMoveKind';
+export * from './arcadeOverview';
+export * from './arcadePurchase';
+export * from './arcadeSettings';
+export * from './arcadeSettingsToggles';
+export * from './arcadeSettingsUpdate';
+export * from './arcadeSettingsUpdateToggles';
+export * from './arcadeShopItem';
 export * from './discordStatus';
+export * from './getArcadeOverviewParams';
 export * from './healthStatus';
