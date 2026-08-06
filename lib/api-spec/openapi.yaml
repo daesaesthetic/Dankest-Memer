@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: discord
+    description: Discord connection operations
 paths:
   /healthz:
     get:
@@ -24,6 +26,19 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /discord/status:
+    get:
+      operationId: getDiscordStatus
+      tags: [discord]
+      summary: Get Discord bot connection status
+      description: Returns safe connection details for the configured Discord bot.
+      responses:
+        "200":
+          description: Discord connection status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiscordStatus"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +48,23 @@ components:
           type: string
       required:
         - status
+    DiscordStatus:
+      type: object
+      properties:
+        connected:
+          type: boolean
+        botName:
+          type: ["string", "null"]
+        botTag:
+          type: ["string", "null"]
+        guildCount:
+          type: number
+        message:
+          type: string
+      required:
+        - connected
+        - botName
+        - botTag
+        - guildCount
+        - message
 

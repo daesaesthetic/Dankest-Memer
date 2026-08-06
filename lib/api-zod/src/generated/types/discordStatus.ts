@@ -5,9 +5,6 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-export interface HealthStatus {
-  status: string;
-}
 
 export interface DiscordStatus {
   connected: boolean;
@@ -18,4 +15,3 @@ export interface DiscordStatus {
   guildCount: number;
   message: string;
 }
-

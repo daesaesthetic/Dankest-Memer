@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Arcade Command"
+description = "A lively command center for a Discord community bot with economy, mini-games, meme creation, leaderboards, moderation, and server configuration."
+version = "1.0.0"
+id = "artifacts/arcade-command"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22931
+
+[services.development]
+run = "pnpm --filter @workspace/arcade-command run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/arcade-command", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/arcade-command/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22931"
+BASE_PATH = "/"

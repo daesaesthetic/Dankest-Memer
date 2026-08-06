@@ -1,6 +1,6 @@
-# [Project name]
+# Arcade Command
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Arcade Command is a Discord community bot command center with economy, games, meme creation, leaderboards, moderation controls, and server settings.
 
 ## Run & Operate
 
@@ -22,15 +22,21 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/arcade-command/src/App.tsx` — responsive command center UI and local demo interactions
+- `artifacts/arcade-command/src/index.css` — product theme, typography, motion, and responsive styling
+- `lib/api-spec/openapi.yaml` — API contract, including Discord connection status
+- `artifacts/api-server/src/routes/discord.ts` — server-side Discord bot status lookup
+- `attached_assets/Pasted-Create-a-Discord-bot-that-replicates-the-functionality-_1786001920240.txt` — original product brief
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Keep the bot token server-side and expose only safe connection status fields to the browser.
+- Use local demo state for economy, games, memes, settings, and moderation until Discord command execution is implemented.
+- Keep the frontend responsive and route-based so each command center surface can grow independently.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+Users can explore an economy dashboard, transfer credits between wallet and bank, buy shop items, play mini-games, create and save meme cards, inspect multiple leaderboards, log moderation actions, configure server settings, and search the command index. The connected Discord bot identity and server count are shown when the secure token is valid.
 
 ## User preferences
 
@@ -38,7 +44,8 @@ _Populate as you build — explicit user instructions worth remembering across s
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Run `pnpm --filter @workspace/api-spec run codegen` after OpenAPI changes before typechecking packages that consume generated schemas.
+- Discord command execution, moderation mutations, and message access still require a gateway/permissions implementation; the current UI labels those surfaces as demo-safe.
 
 ## Pointers
 

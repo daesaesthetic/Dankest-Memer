@@ -1,0 +1,1 @@
+- [Generated API schemas](generated-api-schemas.md) — OpenAPI integer formats can emit `zod.int()` while this workspace uses Zod 3; use numeric schemas when compatibility matters.
