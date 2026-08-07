@@ -4,12 +4,36 @@ Arcade Command is a Discord community bot command center with economy, games, me
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/api-server run dev` — run the API server (port 8080)
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - Required env: `DATABASE_URL` — Postgres connection string
+
+## UptimeRobot monitoring
+
+The API exposes a dependency-free health check at `GET /api/healthz`. It returns
+HTTP `200` with `{"status":"ok"}` and does not require the Discord token or a
+database query, so UptimeRobot can use it to detect whether the API process is
+reachable.
+
+For a continuously running Discord bot:
+
+1. Publish the **API Server** artifact as an **Always On / VM** deployment.
+   Autoscale deployments can scale down when idle; an uptime ping is not a
+   substitute for an always-on deployment.
+2. Copy the published API URL from Replit. Do not use the workspace
+   `.replit.dev` URL.
+3. In UptimeRobot, create an **HTTP(s)** monitor:
+   - URL: `<published-api-url>/api/healthz`
+   - Method: `GET`
+   - Expected status: `200`
+   - Interval: 5 minutes or more
+4. Confirm the monitor receives `{"status":"ok"}`.
+
+UptimeRobot can alert you when the published API is unreachable, but Replit's
+VM deployment is what keeps the Discord gateway process running continuously.
 
 ## Stack
 
@@ -18,7 +42,7 @@ Arcade Command is a Discord community bot command center with economy, games, me
 - DB: PostgreSQL + Drizzle ORM
 - Validation: Zod (`zod/v4`), `drizzle-zod`
 - API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- Build: esbuild (ESM bundle)
 
 ## Where things live
 
