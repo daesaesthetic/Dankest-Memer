@@ -1,2 +1,3 @@
 - [Generated API schemas](generated-api-schemas.md) — OpenAPI integer formats can emit `zod.int()` while this workspace uses Zod 3; use numeric schemas when compatibility matters.
 - [Gateway uptime monitoring](uptime-monitoring.md) — External monitors alert on reachability; long-running Discord clients still need an always-on VM deployment.
+- [Arcade migration policy](arcade-migration-policy.md) — Economy schema changes use immutable Drizzle migrations; do not replace shared history with push-based changes.

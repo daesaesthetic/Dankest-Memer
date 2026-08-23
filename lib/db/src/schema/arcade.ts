@@ -84,7 +84,7 @@ export const inventoryTable = pgTable(
     guildId: text("guild_id").notNull(),
     userId: text("user_id").notNull(),
     itemId: text("item_id").notNull(),
-    quantity: integer("quantity").notNull(),
+    quantity: integer("quantity").notNull().default(0),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
       .defaultNow()

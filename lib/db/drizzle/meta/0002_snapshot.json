@@ -237,7 +237,8 @@
           "name": "quantity",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": 0
         },
         "updated_at": {
           "name": "updated_at",
