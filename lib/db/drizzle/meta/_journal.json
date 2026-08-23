@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1787527474000,
+      "tag": "0000_arcade_baseline",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1787527475000,
+      "tag": "0001_harden_economy_constraints",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1787527678905,
+      "tag": "0002_schema_snapshot",
+      "breakpoints": true
+    }
+  ]
+}

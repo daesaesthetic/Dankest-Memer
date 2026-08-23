@@ -1,5 +1,7 @@
 import { createInsertSchema } from "drizzle-zod";
+import { sql } from "drizzle-orm";
 import {
+  check,
   integer,
   jsonb,
   pgTable,
@@ -53,6 +55,26 @@ export const economyAccountsTable = pgTable(
   },
   (table) => ({
     pk: primaryKey({ columns: [table.guildId, table.userId] }),
+    walletIsNonNegative: check(
+      "arcade_economy_wallet_nonnegative",
+      sql`${table.wallet} >= 0`,
+    ),
+    bankIsNonNegative: check(
+      "arcade_economy_bank_nonnegative",
+      sql`${table.bank} >= 0`,
+    ),
+    xpIsNonNegative: check(
+      "arcade_economy_xp_nonnegative",
+      sql`${table.xp} >= 0`,
+    ),
+    achievementCountIsNonNegative: check(
+      "arcade_economy_achievement_count_nonnegative",
+      sql`${table.achievementCount} >= 0`,
+    ),
+    dailyStreakIsNonNegative: check(
+      "arcade_economy_daily_streak_nonnegative",
+      sql`${table.dailyStreak} >= 0`,
+    ),
   }),
 );
 
@@ -62,7 +84,7 @@ export const inventoryTable = pgTable(
     guildId: text("guild_id").notNull(),
     userId: text("user_id").notNull(),
     itemId: text("item_id").notNull(),
-    quantity: integer("quantity").notNull().default(0),
+    quantity: integer("quantity").notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
       .defaultNow()
@@ -70,6 +92,10 @@ export const inventoryTable = pgTable(
   },
   (table) => ({
     pk: primaryKey({ columns: [table.guildId, table.userId, table.itemId] }),
+    quantityIsPositive: check(
+      "arcade_inventory_quantity_positive",
+      sql`${table.quantity} > 0`,
+    ),
   }),
 );
 

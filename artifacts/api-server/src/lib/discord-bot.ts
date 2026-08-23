@@ -12,10 +12,9 @@ import {
   type GuildMember,
   type Message,
 } from "discord.js";
-import { and, eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import {
   db,
-  economyAccountsTable,
   serverSettingsTable,
 } from "@workspace/db";
 import {
@@ -29,6 +28,7 @@ import {
   getSettings,
   moveMoney,
   runEarningAction,
+  transferMoney,
 } from "./arcade";
 import { logger } from "./logger";
 
@@ -323,15 +323,13 @@ async function handleSlash(interaction: ChatInputCommandInteraction): Promise<vo
   if (command === "give") {
     const target = interaction.options.getUser("member", true);
     const amount = interaction.options.getInteger("amount", true);
-    const sender = await getAccount(context.guildId, context.userId, context.username);
-    if (sender.wallet < amount) {
-      await interaction.reply("You do not have enough in your wallet.");
-      return;
-    }
-    const recipient = await getAccount(context.guildId, target.id, target.username);
-    await moveMoney({ ...context, kind: "withdraw", amount: 0 });
-    await dbTransfer(context.guildId, sender.userId, recipient.userId, amount);
-    await interaction.reply(`Sent **${formatCredits(amount)}** to **${target.username}**.`);
+    const result = await transferMoney({
+      ...context,
+      recipientId: target.id,
+      recipientUsername: target.username,
+      amount,
+    });
+    await interaction.reply(result.message);
     return;
   }
 
@@ -464,11 +462,6 @@ async function handlePrefix(message: Message): Promise<void> {
     await message.channel.permissionOverwrites.edit(message.guild.roles.everyone, { SendMessages: commandName === "unlock" });
     await message.reply(`${commandName === "lock" ? "Locked" : "Unlocked"} this channel.`);
   }
-}
-
-async function dbTransfer(guildId: string, senderId: string, recipientId: string, amount: number) {
-  await db.update(economyAccountsTable).set({ wallet: sql`${economyAccountsTable.wallet} - ${amount}` }).where(and(eq(economyAccountsTable.guildId, guildId), eq(economyAccountsTable.userId, senderId)));
-  await db.update(economyAccountsTable).set({ wallet: sql`${economyAccountsTable.wallet} + ${amount}` }).where(and(eq(economyAccountsTable.guildId, guildId), eq(economyAccountsTable.userId, recipientId)));
 }
 
 export async function startDiscordBot(): Promise<Client | null> {

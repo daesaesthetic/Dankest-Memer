@@ -8,7 +8,8 @@ Arcade Command is a Discord community bot command center with economy, games, me
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
+- `pnpm --filter @workspace/db run migrate` — apply committed PostgreSQL migrations
+- `pnpm --filter @workspace/api-server run test` — run economy service tests
 - Required env: `DATABASE_URL` — Postgres connection string
 
 ## UptimeRobot monitoring
@@ -70,6 +71,7 @@ _Populate as you build — explicit user instructions worth remembering across s
 
 - Run `pnpm --filter @workspace/api-spec run codegen` after OpenAPI changes before typechecking packages that consume generated schemas.
 - Discord command execution, moderation mutations, and message access still require a gateway/permissions implementation; the current UI labels those surfaces as demo-safe.
+- Apply schema changes through committed migrations. `push` remains available for disposable local development only; do not use it for shared or production data.
 
 ## Pointers
 

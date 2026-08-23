@@ -146,7 +146,6 @@ router.post("/arcade/accounts/:guildId/:userId/daily", async (req, res): Promise
   }
   const result = await runEarningAction({
     guildId: params.data.guildId,
-    guildName: "Arcade server",
     userId: params.data.userId,
     username: body.data.username,
     action: "daily",
@@ -176,7 +175,9 @@ router.post("/arcade/accounts/:guildId/:userId/shop", async (req, res): Promise<
     itemId: body.data.itemId,
     quantity: body.data.quantity,
   });
-  const account = await getAccount(params.data.guildId, params.data.userId, body.data.username);
+  const account = result.ok
+    ? result.account
+    : await getAccount(params.data.guildId, params.data.userId, body.data.username);
   res.json(
     BuyArcadeItemResponse.parse({
       ok: result.ok,
